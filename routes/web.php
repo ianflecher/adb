@@ -26,7 +26,10 @@ Route::get('/user', function () {
     return view('user/landingpage');
 });
 
+
 Route::get('product/add', [ProductController::class, 'create'])->name('product.add');
+
+Route::post('/add-to-cart/{productId}', [ProductController::class, 'addToCart'])->name('add.to.cart');
 
 Route::get('/products/category/{id}', [ProductController::class, 'filterByCategory'])->name('product.category');
 
@@ -41,33 +44,10 @@ Route::post('admin/logout', [AdminController::class, 'logout'])->name('admin.log
 
 Route::get('admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 Route::get('user', [ProductController::class, 'index'])->name('user.landingpage');
+
 Route::get('admin/dashboard', [ProductController::class, 'index'])->name('admin.dashboard');
 Route::delete('/product/{product}', [ProductController::class, 'destroy'])->name('product.destroy');
-
-// Customer Routes
-Route::resource('customers', CustomerController::class);
-
-// Order Routes
-Route::resource('orders', OrderController::class);
-
-// OrderItem Routes
-Route::resource('order-items', OrderItemController::class);
-
-// Product Routes
-Route::resource('products', ProductController::class);
-
-
-// Discount Routes
-Route::resource('discounts', DiscountController::class);
-
-// Feedback Routes
-Route::resource('feedbacks', FeedbackController::class);
-
-// Category Routes
-Route::resource('categories', CategoryController::class);
-
-// BundleItem Routes
-Route::resource('bundle-items', BundleItemController::class);
-
-// Payment Routes
-Route::resource('payments', PaymentController::class);
+Route::post('/save-cart', [ProductController::class, 'saveCart']);
+Route::get('user/checkout', [OrderController::class, 'showCheckoutPage']);
+Route::get('user/payment', [OrderController::class, 'payment'])->name('payment');
+Route::post('/checkout', [OrderController::class, 'checkout']);

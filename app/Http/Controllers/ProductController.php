@@ -39,47 +39,31 @@ public function filterByCategory($id)
 
 
     // Show the form for creating a new product
-    public function create()
-    {
-        return view('product.add');
-    }
+    public function create() {
+    $categories = Category::all();
+    return view('product.add', compact('categories'));
+}
+
 
     // Store a newly created product in the database
     public function store(Request $request)
 {
+    // dd($request->all());
     $validated = $request->validate([
         'name' => 'required|string|max:255',
-        'category' => 'required|string',
+        'category_id' => 'required|integer',  // Ensure this matches the form
         'price' => 'required|numeric',
         'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         'details' => 'nullable|string',
     ]);
-
-    // Map category name to an ID
-    $categories = [
-        'fruits_vegetables' => 1,
-        'legumes_beans' => 2,
-        'grains_cereals' => 3,
-        'nuts_seeds' => 4,
-        'plant_based_proteins' => 5,
-        'dairy_alternatives' => 6,
-        'breads_wraps' => 7,
-        'condiments_sauces' => 8,
-        'vegan_snacks' => 9,
-        'desserts_sweets' => 10,
-    ];
-    
-
-    // Convert category name to ID
-    if (!isset($categories[$validated['category']])) {
-        return back()->withErrors(['category' => 'Invalid category selected.']);
-    }
-
-    $validated['category_id'] = $categories[$validated['category']];
-    unset($validated['category']); // Remove original category name
-
+ 
     // Create product
-    $product = Product::create($validated);
+    $product = Product::create([
+        'name' => $validated['name'],
+        'category_id' => $validated['category_id'], 
+        'price' => $validated['price'],
+        'details' => $validated['details'],
+    ]);
 
     // Handle image upload
     if ($request->hasFile('image')) {
@@ -92,6 +76,7 @@ public function filterByCategory($id)
 
     return redirect()->route('admin.dashboard')->with('success', 'Product added successfully.');
 }
+
 
 
     // Display the specified product
@@ -134,4 +119,28 @@ public function filterByCategory($id)
         $product->delete();
         return redirect()->route('admin.dashboard')->with('success', 'Product deleted successfully.');
     }
+
+    // In your controller
+public function addToCart(Request $request, $productId)
+{
+    $product = Product::find($productId);
+
+    // Assuming you're storing the cart in the session
+    $cart = session()->get('cart', []);
+
+    if(isset($cart[$productId])) {
+        $cart[$productId]['quantity']++;
+    } else {
+        $cart[$productId] = [
+            'name' => $product->name,
+            'price' => $product->price,
+            'quantity' => 1,
+        ];
+    }
+
+    session()->put('cart', $cart);
+    return redirect()->route('user.landingpage')->with('success', 'Product added to cart');
+}
+
+
 }
